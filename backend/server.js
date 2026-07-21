@@ -8,15 +8,41 @@ const PORT = 1999;
 const mapText = fs.readFileSync("./map.ascii", "utf-8");
 const mapRows = mapText.trim().split("\n");
 
+const bookingsText = fs.readFileSync("./bookings.json", "utf-8");
+const bookings = JSON.parse(bookingsText);
+
+const bookedCabanas = new Map();
+
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-app.get("/map", (req, res) => {
+app.get("/api/map", (req, res) => {
     res.json({ map: mapRows });
+})
+
+app.post("/api/cabanas/:cabanaId/book", (req, res) => {
+  const cabanaId = req.params.cabanaId;
+  const { room, guestName } = req.body;
+
+  const guestExists = bookings.some(booking => booking.guestName === guestName && booking.room === room);
+
+  if (!guestExists) return res.status(400).json({ error: "Guest not found in bookings" });
+
+  const [row, column] = cabanaId.split("-").map(num => Number(num));
+  const isCabana = mapRows[row]?.[column] === "W";
+
+  if (!isCabana) return res.status(400).json({ error: "Cabana not found" });
+
+  const isBooked = bookedCabanas.has(cabanaId);
+  if (isBooked) return res.status(409).json({ error: "Cabana already booked" });
+
+  bookedCabanas.set(cabanaId, { room, guestName });
+
+  res.status(201).json({ cabanaId, room, guestName, message: "Cabana booked successfully" });
 })
 
 app.listen(PORT, () => {
