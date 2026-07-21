@@ -5,11 +5,48 @@ import fs from "node:fs";
 const app = express();
 const PORT = 1999;
 
-const mapText = fs.readFileSync("./map.ascii", "utf-8");
+function getArgument(flag, defaultValue) {
+  const index = process.argv.indexOf(flag);
+
+  if (index === -1) {
+    return defaultValue;
+  }
+
+  const value = process.argv[index + 1];
+
+  if (!value || value.startsWith("--")) {
+    console.error(`Missing value for ${flag}`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
+function readTextFile(filePath, fileName) {
+  try {
+    return fs.readFileSync(filePath, "utf-8");
+  } catch {
+    console.error(`Failed to read ${fileName} file: ${filePath}`);
+    process.exit(1);
+  }
+}
+
+function parseBookings(bookingsText) {
+  try {
+    return JSON.parse(bookingsText);
+  } catch {
+    console.error("Bookings file contains invalid JSON");
+    process.exit(1);
+  }
+}
+
+const mapPath = getArgument("--map", "./map.ascii");
+const mapText = readTextFile(mapPath, "map");
 const mapRows = mapText.trim().split("\n");
 
-const bookingsText = fs.readFileSync("./bookings.json", "utf-8");
-const bookings = JSON.parse(bookingsText);
+const bookingsPath = getArgument("--bookings", "./bookings.json");
+const bookingsText = readTextFile(bookingsPath, "bookings");
+const bookings = parseBookings(bookingsText);
 
 const bookedCabanas = new Map();
 
@@ -21,18 +58,21 @@ app.get("/api/health", (req, res) => {
 });
 
 app.get("/api/map", (req, res) => {
-    res.json({ map: mapRows, bookedCabanas: [...bookedCabanas.keys()] });
-})
+  res.json({ map: mapRows, bookedCabanas: [...bookedCabanas.keys()] });
+});
 
 app.post("/api/cabanas/:cabanaId/book", (req, res) => {
   const cabanaId = req.params.cabanaId;
   const { room, guestName } = req.body;
 
-  const guestExists = bookings.some(booking => booking.guestName === guestName && booking.room === room);
+  const guestExists = bookings.some(
+    (booking) => booking.guestName === guestName && booking.room === room,
+  );
 
-  if (!guestExists) return res.status(400).json({ error: "Guest not found in bookings" });
+  if (!guestExists)
+    return res.status(400).json({ error: "Guest not found in bookings" });
 
-  const [row, column] = cabanaId.split("-").map(num => Number(num));
+  const [row, column] = cabanaId.split("-").map((num) => Number(num));
   const isCabana = mapRows[row]?.[column] === "W";
 
   if (!isCabana) return res.status(400).json({ error: "Cabana not found" });
@@ -42,8 +82,10 @@ app.post("/api/cabanas/:cabanaId/book", (req, res) => {
 
   bookedCabanas.set(cabanaId, { room, guestName });
 
-  res.status(201).json({ cabanaId, room, guestName, message: "Cabana booked successfully" });
-})
+  res
+    .status(201)
+    .json({ cabanaId, room, guestName, message: "Cabana booked successfully" });
+});
 
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
