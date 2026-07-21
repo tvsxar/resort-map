@@ -63,7 +63,14 @@ app.get("/api/map", (req, res) => {
 
 app.post("/api/cabanas/:cabanaId/book", (req, res) => {
   const cabanaId = req.params.cabanaId;
-  const { room, guestName } = req.body;
+  const { room, guestName } = req.body ?? {};
+  if (
+    typeof room !== "string" ||
+    typeof guestName !== "string" ||
+    !room.trim() ||
+    !guestName.trim()
+  )
+    return res.status(400).json({ error: "Room and guest name are required" });
 
   const guestExists = bookings.some(
     (booking) => booking.guestName === guestName && booking.room === room,
