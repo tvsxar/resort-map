@@ -21,7 +21,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.get("/api/map", (req, res) => {
-    res.json({ map: mapRows });
+    res.json({ map: mapRows, bookedCabanas: [...bookedCabanas.keys()] });
 })
 
 app.post("/api/cabanas/:cabanaId/book", (req, res) => {
