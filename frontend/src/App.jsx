@@ -7,6 +7,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedCabana, setSelectedCabana] = useState(null);
+  const [bookedCabanas, setBookedCabanas] = useState([]);
 
   useEffect(() => {
     async function fetchMap() {
@@ -22,6 +23,7 @@ function App() {
         const data = await response.json();
 
         setMapRows(data.map);
+        setBookedCabanas(data.bookedCabanas);
       } catch {
         setError("Error loading map");
         console.log("Error loading map");
@@ -32,6 +34,29 @@ function App() {
 
     fetchMap();
   }, []);
+
+  async function bookCabana(name, room, cabanaId) {
+    const response = await fetch(`/api/cabanas/${cabanaId}/book`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        guestName: name,
+        room,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to book cabana");
+    }
+
+    setBookedCabanas(prev => [...prev, data.cabanaId]);
+
+    return data;
+  }
 
   if (loading) {
     return <p>Loading map...</p>;
@@ -72,6 +97,7 @@ function App() {
                     rowIndex={rowIndex}
                     columnIndex={columnIndex}
                     onCabanaSelect={setSelectedCabana}
+                    isBooked={bookedCabanas.includes(`${rowIndex}-${columnIndex}`)}
                   />
                 </div>
               )),
@@ -83,6 +109,7 @@ function App() {
           <BookingForm
             selectedCabana={selectedCabana}
             onCabanaSelect={setSelectedCabana}
+            bookCabana={bookCabana}
           />
         )}
       </section>

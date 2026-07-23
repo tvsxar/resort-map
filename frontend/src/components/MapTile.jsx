@@ -60,7 +60,14 @@ function getPathTile(mapRows, rowIndex, columnIndex) {
   return { image, rotation };
 }
 
-function MapTile({ symbol, mapRows, rowIndex, columnIndex, onCabanaSelect }) {
+function MapTile({
+  symbol,
+  mapRows,
+  rowIndex,
+  columnIndex,
+  onCabanaSelect,
+  isBooked,
+}) {
   if (symbol === ".") {
     return null;
   }
@@ -77,7 +84,15 @@ function MapTile({ symbol, mapRows, rowIndex, columnIndex, onCabanaSelect }) {
 
   if (symbol === "W") {
     return (
-      <button className="cursor-pointer hover:scale-103" onClick={() => onCabanaSelect(`${rowIndex}-${columnIndex}`)}>
+      <button
+        disabled={isBooked}
+        className={
+          isBooked
+            ? "cursor-not-allowed opacity-40 grayscale"
+            : "cursor-pointer transition hover:scale-105"
+        }
+        onClick={() => onCabanaSelect(`${rowIndex}-${columnIndex}`)}
+      >
         <img
           src="/assets/cabana.png"
           alt="Cabana"
