@@ -8,6 +8,7 @@ function App() {
   const [error, setError] = useState("");
   const [selectedCabana, setSelectedCabana] = useState(null);
   const [bookedCabanas, setBookedCabanas] = useState([]);
+  const [bookingMessage, setBookingMessage] = useState("");
 
   useEffect(() => {
     async function fetchMap() {
@@ -53,7 +54,8 @@ function App() {
       throw new Error(data.error || "Failed to book cabana");
     }
 
-    setBookedCabanas(prev => [...prev, data.cabanaId]);
+    setBookedCabanas((prev) => [...prev, data.cabanaId]);
+    setBookingMessage(data.message);
 
     return data;
   }
@@ -75,6 +77,12 @@ function App() {
           <p className="mt-2 text-stone-600">
             Select an available cabana to make a booking.
           </p>
+
+          {bookingMessage && (
+            <p className="mt-3 rounded-lg bg-green-100 px-4 py-2 text-sm font-medium text-green-800">
+              {bookingMessage}
+            </p>
+          )}
         </div>
 
         <div className="overflow-x-auto rounded-2xl bg-white p-4 shadow-lg">
@@ -97,13 +105,19 @@ function App() {
                     rowIndex={rowIndex}
                     columnIndex={columnIndex}
                     onCabanaSelect={setSelectedCabana}
-                    isBooked={bookedCabanas.includes(`${rowIndex}-${columnIndex}`)}
+                    isBooked={bookedCabanas.includes(
+                      `${rowIndex}-${columnIndex}`,
+                    )}
                   />
                 </div>
               )),
             )}
           </div>
         </div>
+
+        <p className="mt-4 text-center text-sm text-stone-600">
+          Available cabanas are clickable. Faded cabanas are unavailable.
+        </p>
 
         {selectedCabana && (
           <BookingForm
