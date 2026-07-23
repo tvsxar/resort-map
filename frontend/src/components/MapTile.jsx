@@ -60,7 +60,7 @@ function getPathTile(mapRows, rowIndex, columnIndex) {
   return { image, rotation };
 }
 
-function MapTile({ symbol, mapRows, rowIndex, columnIndex }) {
+function MapTile({ symbol, mapRows, rowIndex, columnIndex, onCabanaSelect }) {
   if (symbol === ".") {
     return null;
   }
@@ -77,11 +77,13 @@ function MapTile({ symbol, mapRows, rowIndex, columnIndex }) {
 
   if (symbol === "W") {
     return (
-      <img
-        src="/assets/cabana.png"
-        alt="Cabana"
-        className="h-full w-full object-contain"
-      />
+      <button className="cursor-pointer hover:scale-103" onClick={() => onCabanaSelect(`${rowIndex}-${columnIndex}`)}>
+        <img
+          src="/assets/cabana.png"
+          alt="Cabana"
+          className="h-full w-full object-contain"
+        />
+      </button>
     );
   }
 
