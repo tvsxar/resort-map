@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import MapTile from './components/MapTile';
 
 function App() {
   const [mapRows, setMapRows] = useState([]);
@@ -38,7 +39,28 @@ function App() {
     return <p>{error}</p>;
   }
 
-  return <pre>{mapRows.join("\n")}</pre>;
+  return (
+    <div className="min-h-screen bg-stone-100 p-8">
+      <div
+        className="grid w-fit bg-cover"
+        style={{
+          backgroundImage: 'url("/assets/parchmentBasic.png")',
+          gridTemplateColumns: `repeat(${mapRows[0]?.length ?? 1}, 32px)`,
+        }}
+      >
+        {mapRows.map((row, rowIndex) =>
+          row.split("").map((symbol, columnIndex) => (
+            <div
+              key={`${rowIndex}-${columnIndex}`}
+              className="flex h-8 w-8 items-center justify-center"
+            >
+              <MapTile symbol={symbol} />
+            </div>
+          )),
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default App;
