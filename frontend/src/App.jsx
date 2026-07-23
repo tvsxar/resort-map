@@ -54,7 +54,7 @@ function App() {
               key={`${rowIndex}-${columnIndex}`}
               className="flex h-8 w-8 items-center justify-center"
             >
-              <MapTile symbol={symbol} />
+              <MapTile symbol={symbol} mapRows={mapRows} rowIndex={rowIndex} columnIndex={columnIndex} />
             </div>
           )),
         )}
