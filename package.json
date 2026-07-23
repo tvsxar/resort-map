@@ -1,0 +1,11 @@
+{
+  "name": "resort-map",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node run.js",
+    "test": "npm --prefix backend test && npm --prefix frontend test",
+    "lint": "npm --prefix frontend run lint",
+    "build": "npm --prefix frontend run build"
+  }
+}
